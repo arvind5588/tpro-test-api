@@ -10,7 +10,16 @@ export class TodoService {
   ) {}
 
   async findAll(): Promise<Todo[]> {
-    return this.todoModel.findAll();
+    try {
+      const todos = await Todo.findAll({
+        order: [['id', 'DESC']],
+      });
+      return todos;
+    } catch (error) {
+      console.error('Error fetching todos:', error);
+      throw error;
+    }
+    // return this.todoModel.findAll();
   }
 
   async findOne(id: number): Promise<Todo> {
