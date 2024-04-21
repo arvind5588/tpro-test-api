@@ -1,7 +1,17 @@
-import { Table, Column, Model, DataType } from 'sequelize-typescript';
+import { Column, Model, Table, DataType } from 'sequelize-typescript';
+interface TodoAttributes {
+  id: number;
+  title: string;
+  description: string;
+  status: 'active' | 'inactive';
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+type TodoType = Omit<Model<TodoAttributes>, keyof Model>;
 
 @Table({ tableName: 'todos' })
-export class Todo extends Model<Todo> {
+export class Todo extends Model<TodoAttributes, TodoType> {
   @Column({
     primaryKey: true,
     autoIncrement: true,

@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TodoController } from './todo.controller';
 import { TodoService } from './todo.service';
 import { Todo } from './todo.model';
+import { HttpException, HttpStatus } from '@nestjs/common';
 
 describe('TodoController', () => {
   let controller: TodoController;
@@ -14,8 +15,9 @@ describe('TodoController', () => {
         {
           provide: TodoService,
           useValue: {
-            findById: jest.fn(),
+            findAll: jest.fn(),
             create: jest.fn(),
+            update: jest.fn(),
             remove: jest.fn(),
           },
         },
@@ -30,27 +32,65 @@ describe('TodoController', () => {
     expect(controller).toBeDefined();
   });
 
-  it('should return all todo items', async () => {
-    const todoItems: Todo[] = [
-      {
+  describe('findAll', () => {
+    it('should return all todo items', async () => {
+      const todoItems: Todo[] = [
+        {
+          id: 1,
+          title: 'Todo 1',
+          description: 'Description for Todo 1',
+          status: 'active',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: 2,
+          title: 'Todo 2',
+          description: 'Description for Todo 2',
+          status: 'active',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ];
+      jest.spyOn(todoService, 'findAll').mockResolvedValue(todoItems);
+      const result = await controller.findAll();
+      expect(result).toEqual(todoItems);
+    });
+  });
+
+  describe('create', () => {
+    it('should create a new todo item', async () => {
+      const newTodo: Todo = {
         id: 1,
-        title: 'Sample Todo',
-        description: 'This is a sample',
+        title: 'New Todo',
+        description: 'Description for New Todo',
         status: 'active',
         createdAt: new Date(),
         updatedAt: new Date(),
-      },
-      {
-        id: 2,
-        title: 'Sample Todo1',
-        description: 'This is a sample2',
+      };
+
+      jest.spyOn(todoService, 'create').mockResolvedValue(newTodo);
+      const token = 'token';
+      const result = await controller.create(newTodo, { user: { token } });
+      expect(result).toEqual(newTodo);
+    });
+
+    it('should throw an error if authentication token is missing', async () => {
+      const newTodo: Todo = {
+        id: 1,
+        title: 'New Todo',
+        description: 'Description for New Todo',
         status: 'active',
         createdAt: new Date(),
         updatedAt: new Date(),
-      },
-    ];
-    jest.spyOn(todoService, 'findAll').mockResolvedValue(todoItems);
-    const result = await controller.findAll();
-    expect(result).toEqual(todoItems);
+      };
+
+      try {
+        await controller.create(newTodo, {});
+      } catch (error) {
+        expect(error).toBeInstanceOf(HttpException);
+        expect(error.getStatus()).toBe(HttpStatus.UNAUTHORIZED);
+      }
+    });
   });
 });
