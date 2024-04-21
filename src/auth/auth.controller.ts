@@ -8,7 +8,7 @@ export class AuthController {
 
   @Post('login')
   async login(@Body() loginDto: LoginDto): Promise<{ accessToken: string }> {
-    const accessToken = await this.authService.generateToken(loginDto.username);
+    const accessToken = await this.authService.generateToken(loginDto);
     return { accessToken };
   }
 }
