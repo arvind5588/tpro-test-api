@@ -7,6 +7,8 @@ config();
 const port = process.env.PORT || 3000;
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  // Enable CORS
+  app.enableCors();
 
   const config = new DocumentBuilder()
     .setTitle('Todo API')
